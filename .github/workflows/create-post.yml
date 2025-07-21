@@ -1,0 +1,35 @@
+name: Create New Post
+
+on:
+  repository_dispatch:
+    types: [create-post]
+
+jobs:
+  create-post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create Post File
+        run: |
+          POST_DATE=$(date -u +"%Y-%m-%d")
+          FILENAME="${POST_DATE}-${{ github.event.client_payload.slug }}.md"
+          
+          cat << EOF > "_posts/${FILENAME}"
+          ---
+          title: "${{ github.event.client_payload.title }}"
+          date: "${{ github.event.client_payload.date }}"
+          author: "${{ github.event.client_payload.author }}"
+          tags: ${{ github.event.client_payload.tags }}
+          ---
+
+          ${{ github.event.client_payload.content }}
+          EOF
+
+      - name: Commit and Push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add "_posts/"
+          git commit -m "Add new post: ${{ github.event.client_payload.title }}"
+          git push

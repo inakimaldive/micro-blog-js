@@ -92,15 +92,38 @@ class MicroBlog {
             title,
             date: new Date().toISOString(),
             author: 'Anonymous', // This will be replaced with actual user authentication
-            tags,
-            content
+            tags: JSON.stringify(tags), // Format tags for GitHub Actions
+            content,
+            slug: this.slugify(title)
         };
 
-        // For now, just log the post (this will be replaced with actual submission logic)
-        console.log('New post:', post);
-        alert('Post submission functionality will be implemented in the next step!');
-        
-        this.newPostForm.reset();
+        try {
+            const response = await fetch('/.netlify/functions/create-post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(post)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create post');
+            }
+
+            alert('Post created successfully!');
+            this.newPostForm.reset();
+            await this.loadPosts(); // Refresh the posts list
+        } catch (error) {
+            console.error('Error creating post:', error);
+            alert('Failed to create post. Please try again.');
+        }
+    }
+
+    slugify(text) {
+        return text
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)+/g, '');
     }
 }
 
