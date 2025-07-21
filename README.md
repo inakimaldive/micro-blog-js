@@ -160,3 +160,6 @@ Edit the `renderPosts` method in `js/app.js` to customize how posts are displaye
 ## License
 
 MIT License - Feel free to use this project for your own blog!
+
+
+--  added netlify
